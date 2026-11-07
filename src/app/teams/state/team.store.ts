@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, tap, map, distinctUntilChanged, shareReplay, of } from 'rxjs';
-import { Team, CreateTeamInput } from '../models/team.model';
+import { Team, CreateTeamInput, Trainer } from '../models/team.model';
 import { TeamApiService } from '../../core/services/team-api.service';
 
 export interface TeamState {
   teams: Team[];
+  trainers: Trainer[];
   loading: boolean;
+  trainersLoading: boolean;
   error: string | null;
   loaded: boolean;
   mutationError: string | null;
@@ -13,7 +15,9 @@ export interface TeamState {
 
 const initialState: TeamState = {
   teams: [],
+  trainers: [],
   loading: false,
+  trainersLoading: false,
   error: null,
   loaded: false,
   mutationError: null,
@@ -26,6 +30,9 @@ export class TeamStore {
 
   /** All teams */
   readonly teams$ = this.select((s) => s.teams);
+
+  /** All trainers */
+  readonly trainers$ = this.select((s) => s.trainers);
 
   /** Whether teams are loading */
   readonly loading$ = this.select((s) => s.loading);
@@ -56,6 +63,29 @@ export class TeamStore {
       }),
       catchError((err: Error) => {
         this.patchState({ loading: false, error: err.message });
+        return of(null);
+      }),
+    ).subscribe();
+
+    this.loadTrainers();
+  }
+
+  /**
+   * Load trainers from the mock server.
+   * Caches results — no-op if already loaded unless force is true.
+   */
+  loadTrainers(force = false): void {
+    const current = this.state$.getValue();
+    if (current.trainers.length > 0 && !force) return;
+
+    this.patchState({ trainersLoading: true });
+
+    this.api.fetchTrainers$().pipe(
+      tap((trainers) => {
+        this.patchState({ trainers, trainersLoading: false });
+      }),
+      catchError(() => {
+        this.patchState({ trainersLoading: false });
         return of(null);
       }),
     ).subscribe();

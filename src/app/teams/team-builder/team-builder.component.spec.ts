@@ -12,6 +12,7 @@ describe('TeamBuilderComponent (Reactive Form & Validation)', () => {
     isTeamNameTaken$: ReturnType<typeof vi.fn>;
     createTeam$: ReturnType<typeof vi.fn>;
     mutationError$: Observable<string | null>;
+    trainers$: Observable<any[]>;
   };
   let pokemonStoreMock: {
     loadPokemon: ReturnType<typeof vi.fn>;
@@ -54,6 +55,10 @@ describe('TeamBuilderComponent (Reactive Form & Validation)', () => {
         created_at: '2024-04-01T00:00:00Z',
       })),
       mutationError$: of(null),
+      trainers$: of([
+        { id: 1, name: 'Ash Ketchum', region: 'Kanto', avatar_url: '' },
+        { id: 2, name: 'Misty', region: 'Kanto', avatar_url: '' },
+      ]),
     };
 
     pokemonStoreMock = {

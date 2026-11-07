@@ -10,6 +10,22 @@
   }
 
   <form class="team-builder__form" [formGroup]="teamForm" (ngSubmit)="onSubmit()">
+    <!-- Trainer Selection -->
+    <div class="team-builder__field">
+      <label class="team-builder__label" for="trainerId">Trainer</label>
+      <select
+        id="trainerId"
+        class="team-builder__input"
+        formControlName="trainerId"
+      >
+        @for (trainer of trainers(); track trainer.id) {
+          <option [value]="trainer.id">
+            {{ trainer.name }} ({{ trainer.region }})
+          </option>
+        }
+      </select>
+    </div>
+
     <!-- Team Name -->
     <div class="team-builder__field">
       <label class="team-builder__label" for="teamName">Team Name</label>

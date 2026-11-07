@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TeamStore } from '../state/team.store';
 import { PokemonStore } from '../../pokedex/state/pokemon.store';
-import { Team } from '../models/team.model';
+import { Team, Trainer } from '../models/team.model';
 import { TYPE_COLORS } from '../../common/constants/app.constants';
 
 const SELECTED_TEAM_STORAGE_KEY = 'pokedex_selected_team_id';
@@ -40,6 +40,7 @@ export class TeamListComponent implements OnInit {
   readonly mutationError = toSignal(this.teamStore.mutationError$, { initialValue: null });
 
   readonly allPokemon = toSignal(this.pokemonStore.pokemon$, { initialValue: [] });
+  readonly trainers = toSignal(this.teamStore.trainers$, { initialValue: [] });
 
   // Deletion state
   readonly deletingId = signal<number | null>(null);
@@ -127,6 +128,11 @@ export class TeamListComponent implements OnInit {
     } else {
       this.selectedTeamId.set(teamId);
     }
+  }
+
+  /** Get Trainer by ID */
+  getTrainer(trainerId: number): Trainer | undefined {
+    return this.trainers().find((t) => t.id === trainerId);
   }
 
   /** Get Pokémon name by ID from cached data */

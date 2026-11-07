@@ -59,6 +59,7 @@ export class TeamBuilderComponent implements OnInit {
 
   // Form
   readonly teamForm = this.fb.group({
+    trainerId: [1, [Validators.required]],
     teamName: ['', [
       Validators.required,
       Validators.minLength(TEAM_NAME_MIN_LENGTH),
@@ -79,6 +80,7 @@ export class TeamBuilderComponent implements OnInit {
 
   // Store data
   readonly allPokemon = toSignal(this.pokemonStore.pokemon$, { initialValue: [] });
+  readonly trainers = toSignal(this.teamStore.trainers$, { initialValue: [] });
   readonly mutationError = toSignal(this.teamStore.mutationError$, { initialValue: null });
 
   // Form status bridge to signal
@@ -172,11 +174,12 @@ export class TeamBuilderComponent implements OnInit {
     this.submitError.set(null);
     this.submitSuccess.set(false);
 
+    const trainerId = Number(this.teamForm.get('trainerId')?.value || 1);
     const teamName = this.teamForm.get('teamName')!.value!;
     const pokemonIds = this.selectedPokemon().map((p) => p.id);
 
     this.teamStore.createTeam$({
-      trainer_id: 1,
+      trainer_id: trainerId,
       name: teamName,
       pokemon_ids: pokemonIds,
     }).pipe(
@@ -208,7 +211,7 @@ export class TeamBuilderComponent implements OnInit {
   }
 
   private resetForm(): void {
-    this.teamForm.reset();
+    this.teamForm.reset({ trainerId: 1, teamName: '' });
     this.selectedPokemon.set([]);
     this.pokemonSearch.set('');
   }

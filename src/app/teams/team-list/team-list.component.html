@@ -92,6 +92,16 @@
           <div class="team-list__card-header">
             <div class="team-list__card-title-group">
               <h3 class="team-list__card-name">{{ team.name }}</h3>
+              @if (getTrainer(team.trainer_id); as trainer) {
+                <span class="team-list__trainer-badge">
+                  @if (trainer.avatar_url) {
+                    <img [src]="trainer.avatar_url" [alt]="trainer.name" class="team-list__trainer-avatar" width="16" height="16" />
+                  } @else {
+                    <span class="team-list__trainer-icon">🧢</span>
+                  }
+                  {{ trainer.name }}
+                </span>
+              }
               @if (selectedTeamId() === team.id) {
                 <span class="team-list__card-selected-tag">Selected</span>
               }
