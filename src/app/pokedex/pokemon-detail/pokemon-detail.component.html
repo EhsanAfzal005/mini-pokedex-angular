@@ -1,0 +1,117 @@
+<div class="pokemon-detail" role="dialog" aria-modal="true">
+  <div class="pokemon-detail__header">
+    <button class="pokemon-detail__close-btn" (click)="onClose()" aria-label="Close">
+      ✕
+    </button>
+  </div>
+
+  <div class="pokemon-detail__content">
+    <!-- Pokémon Identity -->
+    <div class="pokemon-detail__identity">
+      @if (pokemon().spriteUrl) {
+        <img
+          [src]="pokemon().spriteUrl"
+          [alt]="pokemon().name"
+          class="pokemon-detail__image"
+          width="160"
+          height="160"
+        />
+      } @else {
+        <div class="pokemon-detail__image-placeholder">?</div>
+      }
+      <h2 class="pokemon-detail__name">
+        <span class="pokemon-detail__id">#{{ pokemon().id }}</span>
+        {{ pokemon().name | titlecase }}
+      </h2>
+      <div class="pokemon-detail__types">
+        @for (type of pokemon().types; track type) {
+          <span class="pokemon-detail__type-badge" [style.background-color]="getTypeColor(type)">
+            {{ type | titlecase }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Physical Info -->
+    <div class="pokemon-detail__info-row">
+      <div class="pokemon-detail__info-item">
+        <span class="pokemon-detail__info-label">Height</span>
+        <span class="pokemon-detail__info-value">{{ formatHeight(pokemon().height) }}</span>
+      </div>
+      <div class="pokemon-detail__info-item">
+        <span class="pokemon-detail__info-label">Weight</span>
+        <span class="pokemon-detail__info-value">{{ formatWeight(pokemon().weight) }}</span>
+      </div>
+      <div class="pokemon-detail__info-item">
+        <span class="pokemon-detail__info-label">Total Stats</span>
+        <span class="pokemon-detail__info-value">{{ pokemon().totalStats }}</span>
+      </div>
+    </div>
+
+    <!-- Stats with Bars -->
+    <div class="pokemon-detail__section">
+      <h3 class="pokemon-detail__section-title">Base Stats</h3>
+      <div class="pokemon-detail__stats">
+        @for (stat of pokemon().stats; track stat.name) {
+          <div class="pokemon-detail__stat-row">
+            <span class="pokemon-detail__stat-name">{{ statLabels[stat.name] || stat.name }}</span>
+            <span class="pokemon-detail__stat-value">{{ stat.baseStat }}</span>
+            <div class="pokemon-detail__stat-bar-bg">
+              <div
+                class="pokemon-detail__stat-bar"
+                [style.width.%]="(stat.baseStat / 255) * 100"
+                [style.background-color]="stat.baseStat >= 100 ? '#28a745' : stat.baseStat >= 60 ? '#ffc107' : '#dc3545'"
+              ></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Radar Chart -->
+    <div class="pokemon-detail__section">
+      <h3 class="pokemon-detail__section-title">Stats Radar</h3>
+      @if (chartOption()) {
+        <div class="pokemon-detail__chart-container">
+          <div echarts [options]="chartOption()!" class="pokemon-detail__chart"></div>
+        </div>
+      }
+    </div>
+
+    <!-- Abilities -->
+    <div class="pokemon-detail__section">
+      <h3 class="pokemon-detail__section-title">Abilities</h3>
+
+      @if (abilitiesLoading()) {
+        <div class="pokemon-detail__abilities-loading">
+          <div class="pokemon-detail__skeleton pokemon-detail__skeleton--ability"></div>
+          <div class="pokemon-detail__skeleton pokemon-detail__skeleton--ability"></div>
+        </div>
+      } @else if (abilitiesError()) {
+        <div class="pokemon-detail__abilities-error">
+          <p>{{ abilitiesError() }}</p>
+          <button class="pokemon-detail__retry-btn" (click)="onRetryAbilities()">Retry</button>
+        </div>
+      } @else if (abilities() && abilities()!.length === 0) {
+        <p class="pokemon-detail__abilities-empty">No abilities found.</p>
+      } @else if (abilities()) {
+        <div class="pokemon-detail__abilities">
+          @for (ability of abilities()!; track ability.name) {
+            <div class="pokemon-detail__ability">
+              <span class="pokemon-detail__ability-name">
+                {{ ability.name | titlecase }}
+                @if (ability.isHidden) {
+                  <span class="pokemon-detail__ability-hidden">(Hidden)</span>
+                }
+              </span>
+              @if (ability.shortEffect) {
+                <p class="pokemon-detail__ability-effect">{{ ability.shortEffect }}</p>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+

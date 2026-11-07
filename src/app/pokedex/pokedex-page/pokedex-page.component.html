@@ -1,0 +1,29 @@
+<div class="pokedex-page">
+  <div class="pokedex-page__header">
+    <div>
+      <h1 class="pokedex-page__title">Pokédex Browser</h1>
+      <p class="pokedex-page__subtitle">
+        Explore Pokémon, inspect base stats and abilities, and analyze stats with animated radar charts.
+      </p>
+    </div>
+  </div>
+
+  <div class="pokedex-page__body">
+    <app-pokedex-table (pokemonSelected)="onPokemonSelected($event)" />
+  </div>
+
+  @if (isPanelOpen() && selectedPokemon(); as currentPokemon) {
+    <!-- Backdrop overlay -->
+    <div
+      class="pokedex-page__overlay"
+      (click)="onPanelClosed()"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Slide-in detail side panel -->
+    <app-pokemon-detail
+      [pokemon]="currentPokemon"
+      (closed)="onPanelClosed()"
+    />
+  }
+</div>

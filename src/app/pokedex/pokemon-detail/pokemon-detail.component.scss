@@ -1,0 +1,122 @@
+.pokemon-detail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(420px, 100vw);
+  height: 100vh;
+  background: var(--color-surface, #131515);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+  z-index: 100;
+  animation: slide-in 0.3s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--color-surface, #131515);
+    z-index: 1;
+  }
+
+  &__close-btn {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    &:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+  }
+
+  &__content { padding: 0 24px 32px; }
+
+  &__identity { text-align: center; margin-bottom: 24px; }
+
+  &__image { width: 160px; height: 160px; object-fit: contain; margin-bottom: 12px; }
+
+  &__image-placeholder {
+    width: 160px; height: 160px; margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.05); border-radius: 50%;
+    font-size: 48px; color: rgba(255, 255, 255, 0.2);
+  }
+
+  &__name { font-size: 24px; font-weight: 700; margin: 0 0 8px; text-transform: capitalize; }
+  &__id { color: rgba(255, 255, 255, 0.4); font-weight: 400; margin-right: 4px; }
+
+  &__types { display: flex; gap: 8px; justify-content: center; }
+  &__type-badge {
+    padding: 4px 12px; border-radius: 16px;
+    font-size: 12px; font-weight: 600; color: #fff; text-transform: capitalize;
+  }
+
+  &__info-row { display: flex; gap: 12px; margin-bottom: 24px; }
+  &__info-item {
+    flex: 1; text-align: center; padding: 12px;
+    background: var(--color-surface-2, #1e2121); border-radius: 8px;
+  }
+  &__info-label {
+    display: block; font-size: 11px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5); margin-bottom: 4px;
+  }
+  &__info-value { font-size: 16px; font-weight: 600; }
+
+  &__section { margin-bottom: 24px; }
+  &__section-title {
+    font-size: 14px; font-weight: 600; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6); margin: 0 0 12px; letter-spacing: 0.5px;
+  }
+
+  &__stats { display: flex; flex-direction: column; gap: 8px; }
+  &__stat-row { display: flex; align-items: center; gap: 8px; }
+  &__stat-name { width: 56px; font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, 0.7); flex-shrink: 0; }
+  &__stat-value { width: 32px; font-size: 13px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  &__stat-bar-bg { flex: 1; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; }
+  &__stat-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease-out; }
+
+  &__chart-container { width: 100%; aspect-ratio: 1; max-width: 320px; margin: 0 auto; }
+  &__chart { width: 100%; height: 100%; }
+
+  &__abilities { display: flex; flex-direction: column; gap: 12px; }
+  &__ability { padding: 12px; background: var(--color-surface-2, #1e2121); border-radius: 8px; }
+  &__ability-name { font-weight: 600; font-size: 14px; text-transform: capitalize; }
+  &__ability-hidden { font-weight: 400; font-size: 11px; color: var(--color-accent, #ffb414); margin-left: 4px; }
+  &__ability-effect { margin: 6px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.65); line-height: 1.4; }
+
+  &__abilities-loading { display: flex; flex-direction: column; gap: 12px; }
+  &__abilities-error { text-align: center; padding: 16px; color: var(--color-danger, #dc3545); font-size: 14px; }
+  &__abilities-empty { text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 14px; padding: 16px; }
+
+  &__retry-btn {
+    margin-top: 8px; padding: 6px 16px;
+    background: var(--color-primary, #007acc); color: #fff;
+    border: none; border-radius: 6px; font-size: 13px; cursor: pointer;
+    &:hover { opacity: 0.85; }
+  }
+
+  &__skeleton {
+    border-radius: 8px;
+    animation: skeleton-shimmer 1.6s infinite;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    background-size: 200% 100%;
+    &--ability { height: 60px; }
+  }
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
