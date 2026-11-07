@@ -94,12 +94,26 @@
               <h3 class="team-list__card-name">{{ team.name }}</h3>
               @if (getTrainer(team.trainer_id); as trainer) {
                 <span class="team-list__trainer-badge">
-                  @if (trainer.avatar_url) {
-                    <img [src]="trainer.avatar_url" [alt]="trainer.name" class="team-list__trainer-avatar" width="16" height="16" />
+                  @if (trainer.avatar_url && !isAvatarFailed(trainer.id)) {
+                    <img
+                      [src]="trainer.avatar_url"
+                      [alt]="trainer.name"
+                      class="team-list__trainer-avatar"
+                      width="16"
+                      height="16"
+                      (error)="onAvatarError(trainer.id)"
+                    />
                   } @else {
-                    <span class="team-list__trainer-icon">🧢</span>
+                    <svg class="team-list__trainer-pokeball" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                      <path d="M 2 12 A 10 10 0 0 1 22 12 Z" fill="#ef4444" />
+                      <path d="M 2 12 A 10 10 0 0 0 22 12 Z" fill="#f8fafc" />
+                      <circle cx="12" cy="12" r="10" fill="none" stroke="#1e293b" stroke-width="1.6" />
+                      <line x1="2" y1="12" x2="22" y2="12" stroke="#1e293b" stroke-width="1.6" />
+                      <circle cx="12" cy="12" r="3.2" fill="#ffffff" stroke="#1e293b" stroke-width="1.6" />
+                      <circle cx="12" cy="12" r="1.2" fill="#1e293b" />
+                    </svg>
                   }
-                  {{ trainer.name }}
+                  <span class="team-list__trainer-name">{{ trainer.name }}</span>
                 </span>
               }
               @if (selectedTeamId() === team.id) {

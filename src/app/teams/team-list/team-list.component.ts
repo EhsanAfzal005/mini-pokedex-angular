@@ -45,6 +45,17 @@ export class TeamListComponent implements OnInit {
   // Deletion state
   readonly deletingId = signal<number | null>(null);
 
+  // Failed trainer avatars tracking
+  readonly failedAvatars = signal<Set<number>>(new Set());
+
+  onAvatarError(trainerId: number): void {
+    this.failedAvatars.update((set) => new Set(set).add(trainerId));
+  }
+
+  isAvatarFailed(trainerId: number): boolean {
+    return this.failedAvatars().has(trainerId);
+  }
+
   // Selected team state (persisted to localStorage via effect)
   readonly selectedTeamId = signal<number | null>(
     (() => {
