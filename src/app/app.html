@@ -1,0 +1,35 @@
+<div class="app-layout">
+  <header class="app-header">
+    <div class="app-header__container">
+      <div class="app-header__brand">
+        <span class="app-header__logo" aria-hidden="true">⚡</span>
+        <div class="app-header__title-group">
+          <span class="app-header__title">Mini Pokédex</span>
+          <span class="app-header__badge">GraphQL</span>
+        </div>
+      </div>
+      <nav class="app-header__nav" aria-label="Main navigation">
+        <a
+          routerLink="/pokedex"
+          routerLinkActive="app-header__link--active"
+          class="app-header__link"
+        >
+          Pokédex
+        </a>
+        <a
+          routerLink="/teams"
+          routerLinkActive="app-header__link--active"
+          class="app-header__link"
+        >
+          Teams
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="app-main__container">
+      <router-outlet />
+    </div>
+  </main>
+</div>

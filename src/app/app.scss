@@ -1,0 +1,97 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-surface, #131515);
+  color: #fff;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(19, 21, 21, 0.85);
+  backdrop-filter: var(--backdrop-blur, blur(16px));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  &__container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__logo {
+    font-size: 24px;
+    filter: drop-shadow(0 0 8px rgba(255, 180, 20, 0.5));
+  }
+
+  &__title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  &__badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 6px;
+    background: rgba(0, 122, 204, 0.2);
+    color: var(--color-primary, #007acc);
+    border: 1px solid rgba(0, 122, 204, 0.4);
+    border-radius: 4px;
+  }
+
+  &__nav {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__link {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    &--active {
+      color: #fff;
+      background: var(--color-surface-2, #1e2121);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  }
+}
+
+.app-main {
+  flex: 1;
+  padding: 32px 0 64px;
+
+  &__container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+}
