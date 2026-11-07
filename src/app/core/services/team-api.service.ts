@@ -18,7 +18,7 @@ export class TeamApiService {
   /** Fetch all teams from the local mock server */
   fetchTeams$(): Observable<Team[]> {
     return this.http
-      .post<GraphQLResponse<{ allTeams: Team[] }>>(MOCK_API_URL, {
+      .post<GraphQLResponse<{ allTeams: Array<{ id: string | number; trainer_id: string | number; name: string; pokemon_ids: number[]; created_at: string }> }>>(MOCK_API_URL, {
         query: GET_ALL_TEAMS,
       })
       .pipe(
@@ -26,7 +26,12 @@ export class TeamApiService {
           if (res.errors?.length) {
             throw new Error(res.errors[0].message);
           }
-          return res.data.allTeams;
+          return res.data.allTeams.map((t) => ({
+            ...t,
+            id: Number(t.id),
+            trainer_id: Number(t.trainer_id),
+            pokemon_ids: (t.pokemon_ids || []).map(Number),
+          }));
         }),
         catchError((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Failed to fetch teams';
@@ -38,7 +43,7 @@ export class TeamApiService {
   /** Fetch all trainers from the local mock server */
   fetchTrainers$(): Observable<Trainer[]> {
     return this.http
-      .post<GraphQLResponse<{ allTrainers: Trainer[] }>>(MOCK_API_URL, {
+      .post<GraphQLResponse<{ allTrainers: Array<{ id: string | number; name: string; region: string; avatar_url: string }> }>>(MOCK_API_URL, {
         query: GET_ALL_TRAINERS,
       })
       .pipe(
@@ -46,7 +51,10 @@ export class TeamApiService {
           if (res.errors?.length) {
             throw new Error(res.errors[0].message);
           }
-          return res.data.allTrainers;
+          return res.data.allTrainers.map((t) => ({
+            ...t,
+            id: Number(t.id),
+          }));
         }),
         catchError((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Failed to fetch trainers';
@@ -58,10 +66,12 @@ export class TeamApiService {
   /** Create a new team via mutation */
   createTeam$(input: CreateTeamInput): Observable<Team> {
     return this.http
-      .post<GraphQLResponse<{ createTeam: Team }>>(MOCK_API_URL, {
+      .post<GraphQLResponse<{ createTeam: { id: string | number; trainer_id: string | number; name: string; pokemon_ids: number[]; created_at: string } }>>(MOCK_API_URL, {
         query: CREATE_TEAM,
         variables: {
-          ...input,
+          trainer_id: String(input.trainer_id),
+          name: input.name,
+          pokemon_ids: input.pokemon_ids,
           created_at: new Date().toISOString(),
         },
       })
@@ -70,7 +80,13 @@ export class TeamApiService {
           if (res.errors?.length) {
             throw new Error(res.errors[0].message);
           }
-          return res.data.createTeam;
+          const team = res.data.createTeam;
+          return {
+            ...team,
+            id: Number(team.id),
+            trainer_id: Number(team.trainer_id),
+            pokemon_ids: (team.pokemon_ids || []).map(Number),
+          };
         }),
         catchError((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Failed to create team';
