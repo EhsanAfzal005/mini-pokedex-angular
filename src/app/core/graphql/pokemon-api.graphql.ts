@@ -1,24 +1,27 @@
-/** GraphQL queries for PokéAPI (https://beta.pokeapi.co/graphql/v1beta) */
+/**
+ * GraphQL queries for PokéAPI.
+ * Compatible with the active PokéAPI GraphQL endpoint (v1beta2).
+ */
 
 export const GET_POKEMON_LIST = `
   query GetPokemon($limit: Int, $offset: Int) {
-    pokemon_v2_pokemon(limit: $limit, offset: $offset) {
+    pokemon(limit: $limit, offset: $offset) {
       id
       name
       height
       weight
-      pokemon_v2_pokemontypes {
-        pokemon_v2_type {
+      pokemontypes {
+        type {
           name
         }
       }
-      pokemon_v2_pokemonstats {
+      pokemonstats {
         base_stat
-        pokemon_v2_stat {
+        stat {
           name
         }
       }
-      pokemon_v2_pokemonsprites {
+      pokemonsprites {
         sprites
       }
     }
@@ -27,10 +30,10 @@ export const GET_POKEMON_LIST = `
 
 export const GET_POKEMON_ABILITIES = `
   query GetAbilities($pokemonId: Int!) {
-    pokemon_v2_pokemonability(where: { pokemon_id: { _eq: $pokemonId } }) {
-      pokemon_v2_ability {
+    pokemonability(where: { pokemon_id: { _eq: $pokemonId } }) {
+      ability {
         name
-        pokemon_v2_abilityeffecttexts(where: { language_id: { _eq: 9 } }) {
+        abilityeffecttexts(where: { language_id: { _eq: 9 } }) {
           short_effect
         }
       }

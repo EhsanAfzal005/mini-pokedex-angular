@@ -4,12 +4,13 @@ import { Observable, map, retry, timer, catchError, throwError } from 'rxjs';
 import { PokemonRaw, PokemonAbility } from '../../pokedex/models/pokemon.model';
 import { GET_POKEMON_LIST, GET_POKEMON_ABILITIES } from '../graphql/pokemon-api.graphql';
 
-const POKEAPI_URL = 'https://beta.pokeapi.co/graphql/v1beta';
+// Active PokéAPI GraphQL endpoint
+const POKEAPI_URL = 'https://graphql.pokeapi.co/v1beta2';
 const RETRY_COUNT = 3;
 const RETRY_DELAY_MS = 1000;
 
 interface GraphQLResponse<T> {
-  data: T;
+  data?: T;
   errors?: { message: string }[];
 }
 
@@ -19,21 +20,31 @@ export class PokemonApiService {
 
   /**
    * Fetch a paginated list of Pokémon with types, stats, and sprites.
-   * Retries up to 3 times with 1s delay on failure.
+   * Retries up to 3 times with incremental delay on failure.
    */
   fetchPokemonList$(limit: number, offset: number): Observable<PokemonRaw[]> {
     return this.http
-      .post<GraphQLResponse<{ pokemon_v2_pokemon: PokemonRaw[] }>>(POKEAPI_URL, {
-        query: GET_POKEMON_LIST,
-        variables: { limit, offset },
-      })
+      .post<GraphQLResponse<{ pokemon?: PokemonRaw[]; pokemon_v2_pokemon?: PokemonRaw[] }>>(
+        POKEAPI_URL,
+        {
+          query: GET_POKEMON_LIST,
+          variables: { limit, offset },
+        }
+      )
       .pipe(
-        retry({ count: RETRY_COUNT, delay: (_error, retryCount) => timer(RETRY_DELAY_MS * retryCount) }),
+        retry({
+          count: RETRY_COUNT,
+          delay: (_error, retryCount) => timer(RETRY_DELAY_MS * retryCount),
+        }),
         map((res) => {
           if (res.errors?.length) {
             throw new Error(res.errors[0].message);
           }
-          return res.data.pokemon_v2_pokemon;
+          const list = res.data?.pokemon ?? res.data?.pokemon_v2_pokemon;
+          if (!list) {
+            throw new Error('No Pokémon data returned from GraphQL API');
+          }
+          return list;
         }),
         catchError((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Failed to fetch Pokémon list';
@@ -44,12 +55,19 @@ export class PokemonApiService {
 
   /**
    * Fetch abilities for a single Pokémon by ID.
-   * Retries up to 3 times with 1s delay on failure.
+   * Retries up to 3 times with incremental delay on failure.
    */
   fetchPokemonAbilities$(pokemonId: number): Observable<PokemonAbility[]> {
     return this.http
       .post<GraphQLResponse<{
-        pokemon_v2_pokemonability: {
+        pokemonability?: {
+          ability: {
+            name: string;
+            abilityeffecttexts: { short_effect: string }[];
+          };
+          is_hidden: boolean;
+        }[];
+        pokemon_v2_pokemonability?: {
           pokemon_v2_ability: {
             name: string;
             pokemon_v2_abilityeffecttexts: { short_effect: string }[];
@@ -61,16 +79,29 @@ export class PokemonApiService {
         variables: { pokemonId },
       })
       .pipe(
-        retry({ count: RETRY_COUNT, delay: (_error, retryCount) => timer(RETRY_DELAY_MS * retryCount) }),
+        retry({
+          count: RETRY_COUNT,
+          delay: (_error, retryCount) => timer(RETRY_DELAY_MS * retryCount),
+        }),
         map((res) => {
           if (res.errors?.length) {
             throw new Error(res.errors[0].message);
           }
-          return res.data.pokemon_v2_pokemonability.map((a) => ({
-            name: a.pokemon_v2_ability.name,
-            shortEffect: a.pokemon_v2_ability.pokemon_v2_abilityeffecttexts[0]?.short_effect ?? '',
-            isHidden: a.is_hidden,
-          }));
+          const abilities = res.data?.pokemonability ?? res.data?.pokemon_v2_pokemonability;
+          if (!abilities) return [];
+
+          return abilities.map((a: any) => {
+            const abilityData = a.ability ?? a.pokemon_v2_ability;
+            const effectTexts =
+              abilityData?.abilityeffecttexts ??
+              abilityData?.pokemon_v2_abilityeffecttexts ??
+              [];
+            return {
+              name: abilityData?.name ?? '',
+              shortEffect: effectTexts[0]?.short_effect ?? '',
+              isHidden: a.is_hidden ?? false,
+            };
+          });
         }),
         catchError((error: unknown) => {
           const message = error instanceof Error ? error.message : 'Failed to fetch abilities';
