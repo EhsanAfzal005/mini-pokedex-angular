@@ -1,0 +1,137 @@
+<div class="team-builder">
+  <h2 class="team-builder__title">Create New Team</h2>
+
+  @if (submitSuccess()) {
+    <div class="team-builder__success">✅ Team created successfully!</div>
+  }
+
+  @if (submitError()) {
+    <div class="team-builder__error-banner">⚠️ {{ submitError() }}</div>
+  }
+
+  <form class="team-builder__form" [formGroup]="teamForm" (ngSubmit)="onSubmit()">
+    <!-- Team Name -->
+    <div class="team-builder__field">
+      <label class="team-builder__label" for="teamName">Team Name</label>
+      <input
+        id="teamName"
+        type="text"
+        class="team-builder__input"
+        formControlName="teamName"
+        placeholder="Enter team name (3–30 characters)"
+        [class.team-builder__input--error]="teamForm.get('teamName')!.invalid && teamForm.get('teamName')!.touched"
+      />
+      @if (teamForm.get('teamName')!.touched && teamForm.get('teamName')!.errors) {
+        <div class="team-builder__validation">
+          @if (teamForm.get('teamName')!.errors!['required']) {
+            <p class="team-builder__validation-error">Team name is required.</p>
+          }
+          @if (teamForm.get('teamName')!.errors!['minlength']) {
+            <p class="team-builder__validation-error">
+              Name must be at least {{ teamForm.get('teamName')!.errors!['minlength'].requiredLength }} characters.
+            </p>
+          }
+          @if (teamForm.get('teamName')!.errors!['maxlength']) {
+            <p class="team-builder__validation-error">
+              Name must be at most {{ teamForm.get('teamName')!.errors!['maxlength'].requiredLength }} characters.
+            </p>
+          }
+          @if (teamForm.get('teamName')!.errors!['uniqueName']) {
+            <p class="team-builder__validation-error">This team name is already taken.</p>
+          }
+        </div>
+      }
+      @if (teamForm.get('teamName')!.pending) {
+        <p class="team-builder__validation-pending">Checking name availability...</p>
+      }
+    </div>
+
+    <!-- Pokémon Picker -->
+    <div class="team-builder__field">
+      <label class="team-builder__label">Pokémon ({{ pokemonCountLabel() }})</label>
+
+      @if (selectedPokemon().length > 0) {
+        <div class="team-builder__chips">
+          @for (p of selectedPokemon(); track p.id) {
+            <div class="team-builder__chip">
+              @if (p.spriteUrl) {
+                <img [src]="p.spriteUrl" [alt]="p.name" class="team-builder__chip-sprite" width="24" height="24" />
+              }
+              <span class="team-builder__chip-name">{{ p.name | titlecase }}</span>
+              <button type="button" class="team-builder__chip-remove" (click)="removePokemon(p.id)" [attr.aria-label]="'Remove ' + p.name">
+                ✕
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      @if (canAddMore()) {
+        <div class="team-builder__autocomplete">
+          <input
+            type="text"
+            class="team-builder__input"
+            placeholder="Search Pokémon to add..."
+            [value]="pokemonSearch()"
+            (input)="onPokemonSearchInput($any($event.target).value)"
+            (blur)="onCloseAutocomplete()"
+          />
+          @if (showAutocomplete()) {
+            <div class="team-builder__dropdown">
+              @for (p of autocompleteResults(); track p.id) {
+                <button type="button" class="team-builder__dropdown-item" (mousedown)="selectPokemon(p)">
+                  @if (p.spriteUrl) {
+                    <img [src]="p.spriteUrl" [alt]="p.name" class="team-builder__dropdown-sprite" width="32" height="32" loading="lazy" />
+                  } @else {
+                    <div class="team-builder__dropdown-sprite-placeholder">?</div>
+                  }
+                  <span class="team-builder__dropdown-name">{{ p.name | titlecase }}</span>
+                  <span class="team-builder__dropdown-types">
+                    @for (type of p.types; track type) {
+                      <span class="team-builder__mini-badge" [style.background-color]="getTypeColor(type)">{{ type }}</span>
+                    }
+                  </span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (!hasMinPokemon() && teamForm.touched) {
+        <p class="team-builder__validation-error">Select at least 1 Pokémon.</p>
+      }
+    </div>
+
+    <!-- Team Stats Summary -->
+    @if (selectedPokemon().length > 0) {
+      <div class="team-builder__summary">
+        <div class="team-builder__summary-stat">
+          <span class="team-builder__summary-label">Total Base Stats</span>
+          <span class="team-builder__summary-value">{{ totalTeamStats() }}</span>
+        </div>
+        @if (typeDistribution().length > 0) {
+          <div class="team-builder__summary-types">
+            <span class="team-builder__summary-label">Type Coverage</span>
+            <div class="team-builder__summary-badges">
+              @for (td of typeDistribution(); track td.type) {
+                <span class="team-builder__type-badge" [style.background-color]="getTypeColor(td.type)">
+                  {{ td.type | titlecase }} ×{{ td.count }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <button type="submit" class="team-builder__submit" [disabled]="!isFormValid()">
+      @if (isSubmitting()) {
+        <span class="team-builder__spinner"></span> Creating...
+      } @else {
+        Create Team
+      }
+    </button>
+  </form>
+</div>
+
