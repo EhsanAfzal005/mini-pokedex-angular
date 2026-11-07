@@ -1,0 +1,189 @@
+<div class="pokedex-table">
+  <!-- Filters -->
+  <div class="pokedex-table__filters">
+    <div class="pokedex-table__search">
+      <input
+        type="text"
+        class="pokedex-table__search-input"
+        placeholder="Search Pokémon by name..."
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+    </div>
+    <div class="pokedex-table__type-filter">
+      <select
+        class="pokedex-table__type-select"
+        [value]="selectedType()"
+        (change)="onTypeFilterChange($any($event.target).value)"
+      >
+        <option value="">All Types</option>
+        @for (type of availableTypes(); track type) {
+          <option [value]="type">{{ type | titlecase }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (showLoading()) {
+    <div class="pokedex-table__loading">
+      <table class="pokedex-table__table">
+        <thead>
+          <tr>
+            <th class="pokedex-table__th">Sprite</th>
+            <th class="pokedex-table__th">Name</th>
+            <th class="pokedex-table__th">Types</th>
+            @for (stat of statNames; track stat) {
+              <th class="pokedex-table__th">{{ statLabels[stat] }}</th>
+            }
+            <th class="pokedex-table__th">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of skeletonRows; track row) {
+            <tr class="pokedex-table__skeleton-row">
+              <td><div class="pokedex-table__skeleton pokedex-table__skeleton--sprite"></div></td>
+              <td><div class="pokedex-table__skeleton pokedex-table__skeleton--text"></div></td>
+              <td><div class="pokedex-table__skeleton pokedex-table__skeleton--badges"></div></td>
+              @for (stat of statNames; track stat) {
+                <td><div class="pokedex-table__skeleton pokedex-table__skeleton--stat"></div></td>
+              }
+              <td><div class="pokedex-table__skeleton pokedex-table__skeleton--stat"></div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (showError()) {
+    <div class="pokedex-table__error">
+      <div class="pokedex-table__error-icon">⚠️</div>
+      <p class="pokedex-table__error-message">{{ error() }}</p>
+      <button class="pokedex-table__retry-btn" (click)="onRetry()">
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (showEmpty()) {
+    <div class="pokedex-table__empty">
+      <div class="pokedex-table__empty-icon">🔍</div>
+      <p class="pokedex-table__empty-message">
+        No Pokémon found matching your search criteria.
+      </p>
+      <p class="pokedex-table__empty-hint">
+        Try adjusting your search or filter settings.
+      </p>
+    </div>
+  }
+
+  <!-- Success State -->
+  @if (showData()) {
+    <table class="pokedex-table__table">
+      <thead>
+        <tr>
+          <th class="pokedex-table__th">Sprite</th>
+          <th class="pokedex-table__th pokedex-table__th--sortable" (click)="onSort('name')">
+            Name {{ getSortIcon('name') }}
+          </th>
+          <th class="pokedex-table__th">Types</th>
+          @for (stat of statNames; track stat) {
+            <th
+              class="pokedex-table__th pokedex-table__th--sortable"
+              (click)="onSort($any(stat))"
+            >
+              {{ statLabels[stat] }} {{ getSortIcon($any(stat)) }}
+            </th>
+          }
+          <th
+            class="pokedex-table__th pokedex-table__th--sortable"
+            (click)="onSort('totalStats')"
+          >
+            Total {{ getSortIcon('totalStats') }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pokemon(); track p.id) {
+          <tr class="pokedex-table__row" (click)="onRowClick(p)">
+            <td class="pokedex-table__td pokedex-table__td--sprite">
+              @if (p.spriteUrl) {
+                <img
+                  [src]="p.spriteUrl"
+                  [alt]="p.name"
+                  class="pokedex-table__sprite"
+                  loading="lazy"
+                  width="48"
+                  height="48"
+                />
+              } @else {
+                <div class="pokedex-table__sprite-placeholder">?</div>
+              }
+            </td>
+            <td class="pokedex-table__td pokedex-table__td--name">
+              <span class="pokedex-table__id">#{{ p.id }}</span>
+              {{ p.name | titlecase }}
+            </td>
+            <td class="pokedex-table__td pokedex-table__td--types">
+              @for (type of p.types; track type) {
+                <span
+                  class="pokedex-table__type-badge"
+                  [style.background-color]="getTypeColor(type)"
+                >
+                  {{ type | titlecase }}
+                </span>
+              }
+            </td>
+            @for (stat of statNames; track stat) {
+              <td class="pokedex-table__td pokedex-table__td--stat">
+                {{ getStatValue(p, stat) }}
+              </td>
+            }
+            <td class="pokedex-table__td pokedex-table__td--total">
+              {{ p.totalStats }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pokedex-table__pagination">
+      <div class="pokedex-table__page-size">
+        <label>Rows per page:</label>
+        <select
+          [value]="pageSize()"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+        >
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+      <div class="pokedex-table__page-info">
+        {{ pageIndex() * pageSize() + 1 }}–{{ (pageIndex() + 1) * pageSize() > totalCount() ? totalCount() : (pageIndex() + 1) * pageSize() }}
+        of {{ totalCount() }}
+      </div>
+      <div class="pokedex-table__page-controls">
+        <button
+          class="pokedex-table__page-btn"
+          [disabled]="pageIndex() === 0"
+          (click)="onPageChange(pageIndex() - 1)"
+        >
+          ← Prev
+        </button>
+        <button
+          class="pokedex-table__page-btn"
+          [disabled]="pageIndex() >= totalPages() - 1"
+          (click)="onPageChange(pageIndex() + 1)"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
