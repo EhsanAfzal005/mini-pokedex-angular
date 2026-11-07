@@ -1,0 +1,41 @@
+.teams-page {
+  &__header {
+    margin-bottom: 24px;
+  }
+
+  &__title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+      gap: 36px;
+    }
+  }
+
+  &__builder-section {
+    background: var(--color-surface, #131515);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  &__list-section {
+    background: var(--color-surface, #131515);
+  }
+}

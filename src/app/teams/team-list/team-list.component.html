@@ -1,0 +1,137 @@
+<div class="team-list">
+  <div class="team-list__header-row">
+    <h2 class="team-list__title">My Teams</h2>
+    <span class="team-list__count">{{ teams().length }} {{ teams().length === 1 ? 'team' : 'teams' }}</span>
+  </div>
+
+  @if (mutationError()) {
+    <div class="team-list__error-banner">⚠️ {{ mutationError() }}</div>
+  }
+
+  <!-- Loading State -->
+  @if (showLoading()) {
+    <div class="team-list__loading">
+      @for (i of [0, 1, 2]; track i) {
+        <div class="team-list__skeleton-card">
+          <div class="team-list__skeleton team-list__skeleton--title"></div>
+          <div class="team-list__skeleton team-list__skeleton--meta"></div>
+          <div class="team-list__skeleton-sprites">
+            @for (j of [0, 1, 2, 3, 4, 5]; track j) {
+              <div class="team-list__skeleton team-list__skeleton--sprite"></div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (showError()) {
+    <div class="team-list__error">
+      <div class="team-list__error-icon">⚠️</div>
+      <p class="team-list__error-message">{{ error() }}</p>
+      <button class="team-list__retry-btn" (click)="onRetry()">Retry</button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (showEmpty()) {
+    <div class="team-list__empty">
+      <div class="team-list__empty-icon">📋</div>
+      <p class="team-list__empty-message">No teams created yet.</p>
+      <p class="team-list__empty-hint">Use the form to build and save your first Pokémon team!</p>
+    </div>
+  }
+
+  <!-- Success State -->
+  @if (showData()) {
+    <!-- Selected Team Details Banner (if a team is active) -->
+    @if (selectedTeam(); as activeTeam) {
+      <div class="team-list__active-panel">
+        <div class="team-list__active-header">
+          <div>
+            <span class="team-list__active-badge">Active Selected Team</span>
+            <h3 class="team-list__active-title">{{ activeTeam.name }}</h3>
+          </div>
+          <button class="team-list__active-close" (click)="selectTeam(activeTeam.id)" aria-label="Deselect team">
+            ✕
+          </button>
+        </div>
+        <div class="team-list__active-stats">
+          <div class="team-list__stat-badge">
+            <span class="team-list__stat-label">Total Base Stats</span>
+            <span class="team-list__stat-value">{{ selectedTeamTotalStats() }}</span>
+          </div>
+          <div class="team-list__stat-badge">
+            <span class="team-list__stat-label">Pokémon Count</span>
+            <span class="team-list__stat-value">{{ activeTeam.pokemon_ids.length }} / 6</span>
+          </div>
+        </div>
+        @if (selectedTeamTypeDistribution().length > 0) {
+          <div class="team-list__active-types">
+            <span class="team-list__active-types-label">Type Distribution:</span>
+            <div class="team-list__type-badges">
+              @for (item of selectedTeamTypeDistribution(); track item.type) {
+                <span class="team-list__type-pill" [style.background-color]="typeColors[item.type] || '#777'">
+                  {{ item.type | titlecase }} ×{{ item.count }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="team-list__grid">
+      @for (team of teams(); track team.id) {
+        <div
+          class="team-list__card"
+          [class.team-list__card--selected]="selectedTeamId() === team.id"
+          (click)="selectTeam(team.id)"
+        >
+          <div class="team-list__card-header">
+            <div class="team-list__card-title-group">
+              <h3 class="team-list__card-name">{{ team.name }}</h3>
+              @if (selectedTeamId() === team.id) {
+                <span class="team-list__card-selected-tag">Selected</span>
+              }
+            </div>
+            <button
+              class="team-list__delete-btn"
+              (click)="onDeleteTeam(team, $event)"
+              [disabled]="deletingId() === team.id"
+              aria-label="Delete team"
+              title="Delete team"
+            >
+              @if (deletingId() === team.id) {
+                <span class="team-list__spinner"></span>
+              } @else {
+                🗑️
+              }
+            </button>
+          </div>
+          <p class="team-list__card-meta">Created {{ formatDate(team.created_at) }} • {{ team.pokemon_ids.length }} Pokémon</p>
+          <div class="team-list__card-pokemon">
+            @for (pokemonId of team.pokemon_ids; track pokemonId) {
+              <div class="team-list__pokemon-slot">
+                @if (getPokemonSprite(pokemonId)) {
+                  <img
+                    [src]="getPokemonSprite(pokemonId)"
+                    [alt]="getPokemonName(pokemonId)"
+                    class="team-list__pokemon-sprite"
+                    width="44"
+                    height="44"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="team-list__pokemon-placeholder">?</div>
+                }
+                <span class="team-list__pokemon-name">{{ getPokemonName(pokemonId) | titlecase }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
