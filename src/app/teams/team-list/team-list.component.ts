@@ -136,7 +136,10 @@ export class TeamListComponent implements OnInit {
 
   /** Get Pokémon sprite URL by ID */
   getPokemonSprite(id: number): string | null {
-    return this.allPokemon().find((p) => p.id === id)?.spriteUrl ?? null;
+    return (
+      this.allPokemon().find((p) => p.id === id)?.spriteUrl ??
+      `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+    );
   }
 
   /** Delete a team with confirmation */

@@ -1,5 +1,5 @@
-/** Default number of Pokémon to fetch per batch */
-export const DEFAULT_FETCH_LIMIT = 150;
+/** Default number of Pokémon to fetch per batch (Gen 1 & Gen 2) */
+export const DEFAULT_FETCH_LIMIT = 251;
 
 /** Page size options for the Pokédex table */
 export const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
