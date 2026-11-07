@@ -7,14 +7,14 @@
         class="pokedex-table__search-input"
         placeholder="Search Pokémon by name..."
         [value]="searchQuery()"
-        (input)="onSearchChange($any($event.target).value)"
+        (input)="onSearchInput($event)"
       />
     </div>
     <div class="pokedex-table__type-filter">
       <select
         class="pokedex-table__type-select"
         [value]="selectedType()"
-        (change)="onTypeFilterChange($any($event.target).value)"
+        (change)="onTypeFilterSelect($event)"
       >
         <option value="">All Types</option>
         @for (type of availableTypes(); track type) {
@@ -93,9 +93,9 @@
           @for (stat of statNames; track stat) {
             <th
               class="pokedex-table__th pokedex-table__th--sortable"
-              (click)="onSort($any(stat))"
+              (click)="onSort(stat)"
             >
-              {{ statLabels[stat] }} {{ getSortIcon($any(stat)) }}
+              {{ statLabels[stat] }} {{ getSortIcon(stat) }}
             </th>
           }
           <th
@@ -156,7 +156,7 @@
         <label>Rows per page:</label>
         <select
           [value]="pageSize()"
-          (change)="onPageSizeChange(+$any($event.target).value)"
+          (change)="onPageSizeSelect($event)"
         >
           @for (size of pageSizeOptions; track size) {
             <option [value]="size">{{ size }}</option>

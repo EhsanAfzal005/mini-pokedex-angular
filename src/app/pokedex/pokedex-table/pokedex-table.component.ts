@@ -52,7 +52,7 @@ export class PokedexTableComponent implements OnInit {
 
   // Constants for template
   readonly statLabels = STAT_LABELS;
-  readonly statNames = STAT_NAMES;
+  readonly statNames: readonly SortField[] = STAT_NAMES;
   readonly typeColors = TYPE_COLORS;
   readonly pageSizeOptions = PAGE_SIZE_OPTIONS;
 
@@ -73,6 +73,21 @@ export class PokedexTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.loadPokemon();
+  }
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.onSearchChange(value);
+  }
+
+  onTypeFilterSelect(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.onTypeFilterChange(value);
+  }
+
+  onPageSizeSelect(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    this.onPageSizeChange(value);
   }
 
   onSearchChange(query: string): void {

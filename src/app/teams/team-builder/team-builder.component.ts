@@ -146,6 +146,11 @@ export class TeamBuilderComponent implements OnInit {
     });
   }
 
+  onPokemonSearchEvent(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.onPokemonSearchInput(value);
+  }
+
   onPokemonSearchInput(query: string): void {
     this.pokemonSearch.set(query);
     this.searchInput$.next(query);

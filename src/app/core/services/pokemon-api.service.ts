@@ -9,6 +9,18 @@ const POKEAPI_URL = 'https://graphql.pokeapi.co/v1beta2';
 const RETRY_COUNT = 3;
 const RETRY_DELAY_MS = 1000;
 
+interface RawAbilityEntry {
+  ability?: {
+    name: string;
+    abilityeffecttexts: { short_effect: string }[];
+  };
+  pokemon_v2_ability?: {
+    name: string;
+    pokemon_v2_abilityeffecttexts: { short_effect: string }[];
+  };
+  is_hidden?: boolean;
+}
+
 interface GraphQLResponse<T> {
   data?: T;
   errors?: { message: string }[];
@@ -87,17 +99,19 @@ export class PokemonApiService {
           if (res.errors?.length) {
             throw new Error(res.errors[0].message);
           }
-          const abilities = res.data?.pokemonability ?? res.data?.pokemon_v2_pokemonability;
+          const abilities = (res.data?.pokemonability ?? res.data?.pokemon_v2_pokemonability) as RawAbilityEntry[] | undefined;
           if (!abilities) return [];
 
-          return abilities.map((a: any) => {
-            const abilityData = a.ability ?? a.pokemon_v2_ability;
+          return abilities.map((a: RawAbilityEntry) => {
+            const abilityObj = a.ability;
+            const v2AbilityObj = a.pokemon_v2_ability;
+            const name = abilityObj?.name ?? v2AbilityObj?.name ?? '';
             const effectTexts =
-              abilityData?.abilityeffecttexts ??
-              abilityData?.pokemon_v2_abilityeffecttexts ??
+              abilityObj?.abilityeffecttexts ??
+              v2AbilityObj?.pokemon_v2_abilityeffecttexts ??
               [];
             return {
-              name: abilityData?.name ?? '',
+              name,
               shortEffect: effectTexts[0]?.short_effect ?? '',
               isHidden: a.is_hidden ?? false,
             };

@@ -89,7 +89,7 @@
             class="team-builder__input"
             placeholder="Search Pokémon to add..."
             [value]="pokemonSearch()"
-            (input)="onPokemonSearchInput($any($event.target).value)"
+            (input)="onPokemonSearchEvent($event)"
             (blur)="onCloseAutocomplete()"
           />
           @if (showAutocomplete()) {

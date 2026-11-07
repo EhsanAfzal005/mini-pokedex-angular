@@ -1,36 +1,38 @@
+export interface RawSpriteData {
+  front_default?: string | null;
+  other?: {
+    'official-artwork'?: {
+      front_default?: string | null;
+    };
+  };
+}
+
+export interface RawStatEntry {
+  base_stat?: number;
+  stat?: { name: string };
+  pokemon_v2_stat?: { name: string };
+}
+
+export interface RawTypeEntry {
+  type?: { name: string };
+  pokemon_v2_type?: { name: string };
+}
+
 /** Raw shape returned by PokéAPI GraphQL (supports v1beta2 and legacy v1beta schemas) */
 export interface PokemonRaw {
   id: number;
   name: string;
   height: number;
   weight: number;
-  pokemontypes?: {
-    type: {
-      name: string;
-    };
-  }[];
-  pokemon_v2_pokemontypes?: {
-    pokemon_v2_type: {
-      name: string;
-    };
-  }[];
-  pokemonstats?: {
-    base_stat: number;
-    stat: {
-      name: string;
-    };
-  }[];
-  pokemon_v2_pokemonstats?: {
-    base_stat: number;
-    pokemon_v2_stat: {
-      name: string;
-    };
-  }[];
+  pokemontypes?: RawTypeEntry[];
+  pokemon_v2_pokemontypes?: RawTypeEntry[];
+  pokemonstats?: RawStatEntry[];
+  pokemon_v2_pokemonstats?: RawStatEntry[];
   pokemonsprites?: {
-    sprites: any;
+    sprites: string | RawSpriteData;
   }[];
   pokemon_v2_pokemonsprites?: {
-    sprites: any;
+    sprites: string | RawSpriteData;
   }[];
 }
 
@@ -72,14 +74,14 @@ export const STAT_LABELS: Record<string, string> = {
 
 /** Map raw API response to app Pokemon model */
 export function mapRawToPokemon(raw: PokemonRaw): Pokemon {
-  const statsList = raw.pokemonstats || raw.pokemon_v2_pokemonstats || [];
-  const stats: PokemonStat[] = statsList.map((s: any) => ({
+  const statsList: RawStatEntry[] = raw.pokemonstats || raw.pokemon_v2_pokemonstats || [];
+  const stats: PokemonStat[] = statsList.map((s) => ({
     name: s.stat?.name ?? s.pokemon_v2_stat?.name ?? '',
     baseStat: s.base_stat ?? 0,
   }));
 
-  const typesList = raw.pokemontypes || raw.pokemon_v2_pokemontypes || [];
-  const types: string[] = typesList.map((t: any) => t.type?.name ?? t.pokemon_v2_type?.name ?? '');
+  const typesList: RawTypeEntry[] = raw.pokemontypes || raw.pokemon_v2_pokemontypes || [];
+  const types: string[] = typesList.map((t) => t.type?.name ?? t.pokemon_v2_type?.name ?? '');
 
   let spriteUrl: string | null = null;
   const rawSprites = raw.pokemonsprites?.[0]?.sprites ?? raw.pokemon_v2_pokemonsprites?.[0]?.sprites;
@@ -87,7 +89,7 @@ export function mapRawToPokemon(raw: PokemonRaw): Pokemon {
   if (rawSprites) {
     if (typeof rawSprites === 'string') {
       try {
-        const parsed = JSON.parse(rawSprites);
+        const parsed = JSON.parse(rawSprites) as RawSpriteData;
         spriteUrl =
           parsed?.other?.['official-artwork']?.front_default ??
           parsed?.front_default ??
